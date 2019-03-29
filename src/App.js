@@ -1,77 +1,36 @@
 import React, { Component } from 'react';
+// 引入根组件
+import Root from './components/Index'
+
+// redux相关
+import { createStore, applyMiddleware } from 'redux'
 import { Provider, connect } from 'react-redux'
-import configureStore from './store/configureStore'
-import {addCreator, minusCreator, requestCreator} from './store/actions'
-import logo from './logo.svg';
-import './App.css';
-import {getNewsList} from './assets/scripts/api'
+// 根reducer
+import { rootReducer } from './store/reducers'
 
-const store = configureStore()
+// redux-saga中间件 - 用于处理异步dispatch
+import createSagaMiddleware from 'redux-saga'
+import mySaga from './store/saga/index'
 
-class App extends Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      content: []
-    }
-  }
-  render() {
-    const {count, msg} = this.props
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>Count: {count}</p>
-          <h3>{msg}</h3>
-          {this.state.content.length && <h4>{this.state.content}</h4>}
-          <button onClick={this.add.bind(this)}>add</button>
-          <button onClick={this.minus.bind(this)}>minus</button>
-          <button onClick={this.request.bind(this)}>ajax</button>
-        </header>
-      </div>
-    )
-  }
-  
-  add () {
-    const {dispatch} = this.props
-    dispatch(addCreator('add btn clicked'))
-  }
-  minus () {
-    const {dispatch} = this.props
-    dispatch(minusCreator('minus btn clicked'))
-  }
-  request () {
-    const self = this
-    // const {dispatch} = this.props
-    // dispatch(requestCreator())
-    getNewsList({
-      data: {
-        operationName:'',
-        query:'',
-        variables:{
-          first:20,
-          after:'',
-          order:'POPULAR'
-        },
-        extensions:{
-          query:{
-            id:'21207e9ddb1de777adeaca7a2fb38030'
-          }
-        }
-      },
-      onSuccess (res) {
-        self.setState({
-          content: res.data.articleFeed.items.edges[0].node.content
-        })
-      },
-      onFailure (err) {
-        console.log(err)
-      }
-    })
-  }
-}
+// 日志中间件 - 记录redux的变化，输出在控制台
+import { createLogger } from 'redux-logger'
+
+// 初始化logger中间件
+const loggerMiddleware = createLogger()
+// 初始化saga中间件
+const sagaMiddleware = createSagaMiddleware()
+
+// 初始化store - applyMiddleware 用于挂载中间件
+const store = createStore(
+  rootReducer,
+  applyMiddleware(loggerMiddleware, sagaMiddleware)
+)
+
+// 通常中间件内部的方法都需要：先挂载，后调用
+sagaMiddleware.run(mySaga)
 
 function mapStateToProps (state) {
+  // 将store的state注入到根组件
   const {count, msg} = state
   return {
     count,
@@ -79,13 +38,13 @@ function mapStateToProps (state) {
   }
 }
 
-const AppContainer = connect(mapStateToProps)(App)
+const Container = connect(mapStateToProps)(Root)
 
-export default class Root extends Component {
+export default class App extends Component {
   render () {
     return (
       <Provider store={store}>
-        <AppContainer />
+        <Container />
       </Provider>
     )
   }
