@@ -10,7 +10,7 @@ import { rootReducer } from './store/reducers'
 
 // redux-saga中间件 - 用于处理异步dispatch
 import createSagaMiddleware from 'redux-saga'
-import mySaga from './store/saga/index'
+import rootSaga from './store/saga/index'
 
 // 日志中间件 - 记录redux的变化，输出在控制台
 import { createLogger } from 'redux-logger'
@@ -27,14 +27,16 @@ const store = createStore(
 )
 
 // 通常中间件内部的方法都需要：先挂载，后调用
-sagaMiddleware.run(mySaga)
+sagaMiddleware.run(rootSaga)
 
 function mapStateToProps (state) {
   // 将store的state注入到根组件
-  const {count, msg} = state
+  const {count, msg, newsListData, token} = state
   return {
     count,
-    msg
+    msg,
+    newsListData,
+    token
   }
 }
 

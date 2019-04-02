@@ -1,4 +1,4 @@
-import {ADD, MINUS, REQUEST} from './mutation-types'
+import {ADD, MINUS, FETCH_NEWS_LIST} from './mutation-types'
 
 export function addCreator (msg) {
     return {
@@ -14,8 +14,9 @@ export function minusCreator (msg) {
     }
 }
 
-export function requestCreator () {
+export function fetchNewsList (data) {
     return {
-        type: REQUEST
+        type: FETCH_NEWS_LIST,
+        data
     }
 }

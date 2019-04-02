@@ -14,8 +14,8 @@ function fetchAPI (ajaxObj) {
 				// 	resolve(ajaxObj.onSuccess(res.data))
 				// } else {
 				// 	resolve(ajaxObj.onFailure(res.data))
-                // }
-                resolve(ajaxObj.onSuccess(res.data))
+				// }
+                resolve(res.data)
 			})
 			.catch((err) => {
 				reject(err)
@@ -31,5 +31,17 @@ export function getNewsList (params) {
         data,
 		onSuccess,
 		onFailure
+	})
+}
+
+export function login () {
+	return Promise.resolve({
+		token: 'abc12345678'
+	})
+}
+
+export function logout () {
+	return Promise.resolve({
+		msg: 'logout success'
 	})
 }
