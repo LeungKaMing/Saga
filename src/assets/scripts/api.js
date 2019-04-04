@@ -25,13 +25,15 @@ function fetchAPI (ajaxObj) {
 
 export function getNewsList (params) {
 	const {onSuccess, onFailure, data} = params
-	return fetchAPI({
-		method: 'post',
-        url: 'https://web-api.juejin.im/query',
-        data,
-		onSuccess,
-		onFailure
-	})
+	setTimeout(() => {
+		return fetchAPI({
+			method: 'post',
+			url: 'https://web-api.juejin.im/query',
+			data,
+			onSuccess,
+			onFailure
+		})
+	}, 2000)
 }
 
 export function login () {

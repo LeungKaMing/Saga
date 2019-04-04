@@ -1,14 +1,21 @@
 // 感觉saga拆分更细化了，中间件内部做的每一个小事务
 // 统一用帮助函数是为了写测试代码更方便
-import { call, put, take, takeEvery, all, select, fork, cancel, cancelled } from 'redux-saga/effects'
+import { call, put, take, takeEvery, all, race, fork, cancel, cancelled, delay } from 'redux-saga/effects'
 import * as API from '../../assets/scripts/api'
 import {FETCH_NEWS_LIST, FETCH_NEWS_LIST_SUCCEEDED, FETCH_NEWS_LIST_FAILED} from '../mutation-types'
 
 // worker Saga : 将在 USER_FETCH_REQUESTED action 被 dispatch 时调用
 function* fetchNewsList (action) {
 	try {
-		const result = yield call(API.getNewsList, action.data.params);	// call作为帮助函数，代替了API.getNewsList直接调用api
-		yield put({type: FETCH_NEWS_LIST_SUCCEEDED, result});	// put作为帮助函数，代替了dispatch直接发起action
+		const {result} = yield race({
+			result: yield call(API.getNewsList, action.data.params),
+			timeout: yield delay(1000)
+		})
+		if (result) {
+			yield put({type: FETCH_NEWS_LIST_SUCCEEDED, result});	// put作为帮助函数，代替了dispatch直接发起action
+		} else {
+			yield put({type: FETCH_NEWS_LIST_FAILED, message: 'failed with delay'});	// 延时
+		}
 	} catch (e) {
 		yield put({type: FETCH_NEWS_LIST_FAILED, message: e.message});
 	}
